@@ -10,9 +10,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="script.js"></script>
   </head>
-  <body>
-    <button onclick="getData()">Button</button>
-    <div id="data-container"></div>
+  <body onload="getData()">
     <header>
         <div class="animation jumbotron">
             <img src="images/Photo.jpeg" width="500" />
@@ -56,5 +54,17 @@
             </div>
         </div>
     </main>
+    <footer>
+        <form action="/data" method="POST">
+            <div class="form-group">
+                <label for="comment">Comment</label>
+                <textarea class="form-control" name="comment" cols="50" rows="10"></textarea>
+                <br>
+                <input class="btn btn-primary" type="submit" value="Submit">
+            </div>
+        </form>
+        <p>Comments</p>
+        <ul id="data-container" class="list-group list-group-flush"></ul>
+    </footer>
   </body>
 </html>

@@ -1,14 +1,15 @@
 async function getData() {
     const response = await fetch('/data');
-    const messages = await response.text();
-    JSON.parse(messages).forEach(message => {
-        document.getElementById('data-container').appendChild(createListElement(message));
+    const comments = await response.text();
+    JSON.parse(comments).forEach(comment => {
+        document.getElementById('data-container').appendChild(createListElement(comment));
     })
 }
 
 function createListElement(text) {
     const liElement = document.createElement('li');
     liElement.innerText = text;
+    liElement.classList.add('list-group-item', 'list-group-item-light');
     return liElement;
 }
 
