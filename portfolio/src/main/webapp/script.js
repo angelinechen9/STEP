@@ -1,7 +1,15 @@
 async function getData() {
-  const response = await fetch('/data');
-  const data = await response.text();
-  document.getElementById('data-container').innerHTML = data;
+    const response = await fetch('/data');
+    const messages = await response.text();
+    JSON.parse(messages).forEach(message => {
+        document.getElementById('data-container').appendChild(createListElement(message));
+    })
+}
+
+function createListElement(text) {
+    const liElement = document.createElement('li');
+    liElement.innerText = text;
+    return liElement;
 }
 
 let i = 0;
