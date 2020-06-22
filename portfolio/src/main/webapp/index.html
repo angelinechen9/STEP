@@ -2,17 +2,57 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>My Portfolio</title>
+    <title>Angeline Chen</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="script.js"></script>
   </head>
   <body>
-    <div id="content">
-      <h1>My Portfolio</h1>
-      <p>This is my portfolio.</p>
-      <p>Click here to get a random message:</p>
-      <button onclick="addRandomGreeting()">Hello</button>
-      <div id="greeting-container"></div>
-    </div>
+    <header>
+        <div class="animation jumbotron">
+            <img src="images/Photo.jpeg" width="500" />
+            <h1 class="display-4">Angeline Chen</h1>
+            <div class="d-flex justify-content-around d-flex align-items-center">
+                <a href="https://www.linkedin.com/in/angeline-chen" target="_blank"><i class="fab fa-linkedin fa-3x"></i></a>
+                <a href="https://github.com/angelinechen9" target="_blank"><i class="fab fa-github fa-3x"></i></a>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="card bg-white text-dark border-white">
+            <div class="card-body">
+                <h1 class="card-text">About Me</h1>
+                <h2 class="card-text">College</h2>
+                <p class="card-text">I am a rising junior at Santa Clara University majoring in Computer Science and Engineering.  As a campus ambassador for Google, I organized events on campus, introducing fellow students to Google products.</p>
+                <h3 class="card-text">Google Cloud Platform Student Innovator</h3>
+                <p class="card-text">As the first Google Cloud Platform Student Innovator at my university, I hosted Google Cloud Platform workshops, tabled at annual hackathons as a mentor, and gave class presentations to undergraduate and graduate students.</p>
+                <img src="images/Google Cloud Platform Student Innovator.jpeg" width="250" />
+                <h3 class="card-text">Google Developer Student Club Lead</h3>
+                <p class="card-text">As a Google Developer Student Club Lead, I was invited to attend Developer Student Clubs United States Leads Summit 2019.</p>
+                <img src="images/Google Developer Student Club Lead.jpeg" width="250" />
+                <h2 class="card-text">High School</h2>
+                <p class="card-text">I was born and raised in the Bay Area, and I attended Palo Alto High School.  In high school, I founded two local clubs, Coding Trek and Silicon Valley Star Trek Club, and I was featured in four news articles.</p>
+                <h3 class="card-text">Coding Trek</h3>
+                <h4 id="text" class="card-text"></h4>
+                <p class="card-text">As the founder of Coding Trek, I designed a computer science curriculum for beginners and organized a series of free coding workshops for all ages.  My club was featured in <a href="https://www.losaltosonline.com/news/sections/schools/213-school-noteworthies/56854-" target="_blank">Los Altos Town Crier</a>.</p>
+                <h3 class="card-text">Silicon Valley Star Trek Club</h3>
+                <marquee><h4 class="card-text">To Boldly Go Where No One Has Gone Before</h4></marquee>
+                <p class="card-text">As the founder of Silicon Valley Star Trek Club, I organized weekly discussions about artificial intelligence, utopia, diversity, equality, justice, humanity, and technology.  I also collected and compiled 300 Star Trek quotes.  My club was featured in <a href="http://www.mercurynews.com/2017/04/26/star-trek-travels-well-even-to-the-next-generation/" target="_blank">The Mercury News</a>, <a href="https://www.paloaltoonline.com/news/2017/04/22/palo-alto-teen-creates-her-own-trekkie-starship-crew" target="_blank">Palo Alto Online</a>, and <a href="http://www.losaltosonline.com/news/sections/community/177-features/54219-teen-hopes-star-trek-club-lives-long-and-prospers" target="_blank">Los Altos Town Crier</a>.</p>
+                <h2 class="card-text">Hobbies</h2>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item list-group-item-light">Jigsaw Puzzles</li>
+                    <li class="list-group-item list-group-item-light">Piano 🎹</li>
+                    <li class="list-group-item list-group-item-light">Swimming 🏊‍</li>
+                    <li class="list-group-item list-group-item-light">Badminton 🏸</li>
+                    <li class="list-group-item list-group-item-light">Table Tennis 🏓</li>
+                    <li class="list-group-item list-group-item-light">Fencing 🤺</li>
+                    <li class="list-group-item list-group-item-light">Rock Climbing 🧗‍</li>
+                </ul>
+            </div>
+        </div>
+    </main>
   </body>
 </html>
