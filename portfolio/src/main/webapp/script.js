@@ -2,7 +2,7 @@ async function getData() {
     const response = await fetch('/data');
     const comments = await response.text();
     JSON.parse(comments).forEach(comment => {
-        document.getElementById('data-container').appendChild(createListElement(comment));
+        document.getElementById('data-container').appendChild(createListElement(comment.comment));
     })
 }
 
