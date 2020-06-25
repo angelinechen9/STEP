@@ -30,10 +30,11 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.sps.data.Comment;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
+/** Servlet that creates and reads comments. */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
+    /** Reads comments. */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
@@ -49,6 +50,7 @@ public class DataServlet extends HttpServlet {
         response.getWriter().println(gson.toJson(comments));
     }
 
+    /** Creates comments. */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String comment = getParameter(request, "comment", "");
