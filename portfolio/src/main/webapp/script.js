@@ -1,9 +1,14 @@
 async function getData() {
     const response = await fetch('/data');
     const comments = await response.text();
-    JSON.parse(comments).forEach(comment => {
-        document.getElementById('data-container').appendChild(createListElement(comment.comment));
-    })
+    if (JSON.parse(comments).length == 0) {
+        document.getElementById('data-container').previousElementSibling.style.display = "none";
+    }
+    else {
+        JSON.parse(comments).forEach(comment => {
+            document.getElementById('data-container').appendChild(createListElement(comment.comment));
+        })   
+    }
 }
 
 function createListElement(text) {
