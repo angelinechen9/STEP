@@ -19,8 +19,8 @@ function createListElement(text) {
 }
 
 let i = 0;
-let text = "Learn to Code in HTML, CSS, JavaScript, jQuery, Node, Python, and Java";
-let speed = 100;
+const text = "Learn to Code in HTML, CSS, JavaScript, jQuery, Node, Python, and Java";
+const speed = 100;
 
 function type() {
 	if (i < text.length) {
