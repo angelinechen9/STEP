@@ -34,7 +34,12 @@ import com.google.sps.data.Comment;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
-    /** Reads comments. */
+    /**
+    Reads comments.
+    @param request the request message
+    @param response the response message
+    @throws IOException if there is an I/O error
+    */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
@@ -50,7 +55,12 @@ public class DataServlet extends HttpServlet {
         response.getWriter().println(gson.toJson(comments));
     }
 
-    /** Creates comments. */
+    /**
+    Creates comments.
+    @param request the request message
+    @param response the response message
+    @throws IOException if there is an I/O error
+    */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String comment = getParameter(request, "comment", "");
