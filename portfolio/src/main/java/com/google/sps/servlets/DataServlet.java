@@ -35,10 +35,10 @@ import com.google.sps.data.Comment;
 public class DataServlet extends HttpServlet {
 
     /**
-    Reads comments.
-    @param request the request message
-    @param response the response message
-    @throws IOException if there is an I/O error
+    * Reads comments.
+    * @param request the request message
+    * @param response the response message
+    * @throws IOException if there is an I/O error
     */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -56,10 +56,10 @@ public class DataServlet extends HttpServlet {
     }
 
     /**
-    Creates comments.
-    @param request the request message
-    @param response the response message
-    @throws IOException if there is an I/O error
+    * Creates comments.
+    * @param request the request message
+    * @param response the response message
+    * @throws IOException if there is an I/O error
     */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
