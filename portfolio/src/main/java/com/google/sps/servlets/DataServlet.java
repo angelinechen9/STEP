@@ -16,6 +16,8 @@ package com.google.sps.servlets;
 
 import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +31,8 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.sps.data.Comment;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 
 /** Servlet that creates and reads comments. */
 @WebServlet("/data")
@@ -41,18 +45,36 @@ public class DataServlet extends HttpServlet {
     * @throws IOException if there is an I/O error
     */
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery results = datastore.prepare(query);
         List<Comment> comments = new ArrayList<>();
         for (Entity entity : results.asIterable()) {
-            Comment comment = new Comment(entity.getKey().getId(), (String) entity.getProperty("comment"), (long) entity.getProperty("timestamp"));
+            Comment comment = new Comment(entity.getKey().getId(), (String) entity.getProperty("nickname"), (String) entity.getProperty("comment"), (long) entity.getProperty("timestamp"));
             comments.add(comment);
         }
-        Gson gson = new Gson();
-        response.setContentType("application/json;");
-        response.getWriter().println(gson.toJson(comments));
+        request.setAttribute("comments", comments);
+        UserService userService = UserServiceFactory.getUserService();
+        if (!userService.isUserLoggedIn()) {
+            String loginUrl = userService.createLoginURL("/data");
+            request.setAttribute("loginStatus", false);
+            request.setAttribute("loginUrl", loginUrl);
+        }
+        else {
+            String nickname = getUserNickname(userService.getCurrentUser().getUserId());
+            if (nickname == null) {
+                response.sendRedirect("/nickname");
+            }
+            else {
+                String logoutUrl = userService.createLogoutURL("/data");
+                request.setAttribute("loginStatus", true);
+                request.setAttribute("nickname", nickname);
+                request.setAttribute("logoutUrl", logoutUrl);
+            }
+        }
+        RequestDispatcher dispatcher = request.getRequestDispatcher("data.jsp");
+        dispatcher.forward(request, response);
     }
 
     /**
@@ -63,14 +85,16 @@ public class DataServlet extends HttpServlet {
     */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String nickname = getParameter(request, "nickname", "");
         String comment = getParameter(request, "comment", "");
         long timestamp = System.currentTimeMillis();
         Entity commentEntity = new Entity("Comment");
+        commentEntity.setProperty("nickname", nickname);
         commentEntity.setProperty("comment", comment);
         commentEntity.setProperty("timestamp", timestamp);
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(commentEntity);
-        response.sendRedirect("/index.html");
+        response.sendRedirect("/data");
     }
 
     private String getParameter(HttpServletRequest request, String name, String defaultValue) {
@@ -79,5 +103,17 @@ public class DataServlet extends HttpServlet {
             return defaultValue;
         }
         return value;
+    }
+
+    private String getUserNickname(String id) {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Query query = new Query("UserInfo").setFilter(new Query.FilterPredicate("id", Query.FilterOperator.EQUAL, id));
+        PreparedQuery results = datastore.prepare(query);
+        Entity entity = results.asSingleEntity();
+        if (entity == null) {
+            return null;
+        }
+        String nickname = (String) entity.getProperty("nickname");
+        return nickname;
     }
 }
