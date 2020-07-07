@@ -51,7 +51,11 @@ public class DataServlet extends HttpServlet {
         PreparedQuery results = datastore.prepare(query);
         List<Comment> comments = new ArrayList<>();
         for (Entity entity : results.asIterable()) {
-            Comment comment = new Comment(entity.getKey().getId(), (String) entity.getProperty("nickname"), (String) entity.getProperty("comment"), (long) entity.getProperty("timestamp"));
+            long entityId = entity.getKey().getId();
+            String entityNickname = (String) entity.getProperty("nickname");
+            String entityComment = (String) entity.getProperty("comment");
+            long entityTimestamp = (long) entity.getProperty("timestamp");
+            Comment comment = new Comment(entityId, entityNickname, entityComment, entityTimestamp);
             comments.add(comment);
         }
         request.setAttribute("comments", comments);
@@ -60,13 +64,11 @@ public class DataServlet extends HttpServlet {
             String loginUrl = userService.createLoginURL("/data");
             request.setAttribute("loginStatus", false);
             request.setAttribute("loginUrl", loginUrl);
-        }
-        else {
+        } else {
             String nickname = getUserNickname(userService.getCurrentUser().getUserId());
             if (nickname == null) {
                 response.sendRedirect("/nickname");
-            }
-            else {
+            } else {
                 String logoutUrl = userService.createLogoutURL("/data");
                 request.setAttribute("loginStatus", true);
                 request.setAttribute("nickname", nickname);

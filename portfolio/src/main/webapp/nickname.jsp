@@ -16,6 +16,7 @@
         <a class="nav-link" href="/data">Back</a>
     </nav>
     <main>
+        <%-- form that changes the nickname --%>
         <form action="/nickname" method="POST">
             <div class="form-group">
                 <label for="nickname">Nickname</label>

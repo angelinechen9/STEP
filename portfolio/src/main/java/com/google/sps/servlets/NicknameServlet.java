@@ -48,8 +48,7 @@ public class NicknameServlet extends HttpServlet {
             request.setAttribute("nickname", nickname);
             RequestDispatcher dispatcher = request.getRequestDispatcher("nickname.jsp");
             dispatcher.forward(request, response);
-        }
-        else {
+        } else {
             String loginUrl = userService.createLoginURL("/nickname");
             response.sendRedirect(loginUrl);
         }

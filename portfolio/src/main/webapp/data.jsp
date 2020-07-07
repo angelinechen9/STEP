@@ -26,6 +26,7 @@
     </nav>
     <main>
         <c:if test="${loginStatus == true}">
+            <%-- form that creates a comment --%>
             <form action="/data" method="POST">
                 <div class="form-group">
                     <label for="nickname">Nickname</label>
