@@ -23,6 +23,10 @@ public final class FindMeetingQuery {
         ArrayList<TimeRange> mandatoryAttendeesUnavailableTimes = new ArrayList<TimeRange>();
         //the time slots that mandatory and optional attendees are unavailable
         ArrayList<TimeRange> optionalAttendeesUnavailableTimes = new ArrayList<TimeRange>();
+        HashMap<String, ArrayList<TimeRange>> optionalAttendeeUnavailableTimes = new HashMap<String, ArrayList<TimeRange>>();
+        for (String optionalAttendee : request.getOptionalAttendees()) {
+            optionalAttendeeUnavailableTimes.put(optionalAttendee, new ArrayList<TimeRange>());
+        }
         for (Event event : events) {
             HashSet<String> intersection;
             intersection = new HashSet<String>();
@@ -40,17 +44,67 @@ public final class FindMeetingQuery {
             if (intersection.size() > 0) {
                 optionalAttendeesUnavailableTimes.add(event.getWhen());
             }
+            for (String optionalAttendee : intersection) {
+                optionalAttendeeUnavailableTimes.get(optionalAttendee).add(event.getWhen());
+            }
         }
         //the time slots that mandatory attendees are available
         ArrayList<TimeRange> mandatoryAttendeesAvailableTimes = findAvailableTimes(mandatoryAttendeesUnavailableTimes, request);
         //the time slots that mandatory and optional attendees are available
         ArrayList<TimeRange> optionalAttendeesAvailableTimes = findAvailableTimes(optionalAttendeesUnavailableTimes, request);
+        //find the time slot(s) that allow mandatory attendees and the greatest possible number of optional attendees to attend
+        HashMap<String, ArrayList<TimeRange>> optionalAttendeeAvailableTimes = new HashMap<String, ArrayList<TimeRange>>();
+        for (String optionalAttendee : request.getOptionalAttendees()) {
+            optionalAttendeeAvailableTimes.put(optionalAttendee, new ArrayList<TimeRange>());
+        }
+        for (Map.Entry<String, ArrayList<TimeRange>> entry : optionalAttendeeUnavailableTimes.entrySet()) {
+            String optionalAttendee = entry.getKey();
+            ArrayList<TimeRange> unavailableTimes = entry.getValue();
+            ArrayList<TimeRange> availableTimes = findAvailableTimes(unavailableTimes, request);
+            optionalAttendeeAvailableTimes.get(optionalAttendee).addAll(availableTimes);
+        }
+        HashMap<TimeRange, Integer> optimalAvailableTimes = new HashMap<TimeRange, Integer>();
+        for (Map.Entry<String, ArrayList<TimeRange>> entry : optionalAttendeeAvailableTimes.entrySet()) {
+            ArrayList<TimeRange> availableTimes = entry.getValue();
+            for (TimeRange availableTime : availableTimes) {
+                for (TimeRange mandatoryAttendeesAvailableTime : mandatoryAttendeesAvailableTimes) {
+                    if ((mandatoryAttendeesAvailableTime.contains(availableTime) == true) || (availableTime.contains(mandatoryAttendeesAvailableTime) == true)) {
+                        if (optimalAvailableTimes.containsKey(mandatoryAttendeesAvailableTime)) {
+                            int count = optimalAvailableTimes.get(mandatoryAttendeesAvailableTime);
+                            optimalAvailableTimes.put(mandatoryAttendeesAvailableTime, count + 1);
+                        }
+                        else {
+                            optimalAvailableTimes.put(mandatoryAttendeesAvailableTime, 1);
+                        }
+                    }
+                }
+            }
+        }
+        int maximum = 0;
+        ArrayList<TimeRange> optimalAvailableTime = new ArrayList<TimeRange>();
+        for (Map.Entry<TimeRange, Integer> entry : optimalAvailableTimes.entrySet()) {
+            TimeRange availableTime = entry.getKey();
+            int count = entry.getValue();
+            if (count > maximum) {
+                maximum = count;
+                optimalAvailableTime.clear();
+                optimalAvailableTime.add(availableTime);
+            }
+            else if (count == maximum) {
+                optimalAvailableTime.add(availableTime);
+            }
+        }
         //if there are time slots that mandatory and optional attendees are available
         if (optionalAttendeesAvailableTimes.size() > 0) {
             return optionalAttendeesAvailableTimes;
         }
         else {
-            return mandatoryAttendeesAvailableTimes;
+            if (optimalAvailableTime.size() > 0) {
+                return optimalAvailableTime;
+            }
+            else {
+                return mandatoryAttendeesAvailableTimes;
+            }
         }
     }
 
