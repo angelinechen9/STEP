@@ -275,7 +275,7 @@ public final class FindMeetingQueryTest {
   }
 
   @Test
-  public void optionalAttendees1() {
+  public void optionalAttendeeNoConflicts() {
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartDuration(TIME_0800AM, DURATION_30_MINUTES),
             Arrays.asList(PERSON_A)),
@@ -298,7 +298,7 @@ public final class FindMeetingQueryTest {
   }
 
   @Test
-  public void optionalAttendees2() {
+  public void optionalAttendeeConflicts() {
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartDuration(TIME_0800AM, DURATION_30_MINUTES),
             Arrays.asList(PERSON_A)),
@@ -320,7 +320,7 @@ public final class FindMeetingQueryTest {
   }
 
   @Test
-  public void optionalAttendees3() {
+  public void optionalAttendeeNotEnoughRoom() {
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TIME_0830AM, false),
             Arrays.asList(PERSON_A)),
@@ -340,7 +340,7 @@ public final class FindMeetingQueryTest {
   }
 
   @Test
-  public void optionalAttendees4() {
+  public void optionalAttendeesGaps() {
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartDuration(TIME_0800AM, DURATION_30_MINUTES),
             Arrays.asList(PERSON_A)),
@@ -362,7 +362,7 @@ public final class FindMeetingQueryTest {
   }
 
   @Test
-  public void optionalAttendees5() {
+  public void optionalAttendeesNoGaps() {
     Collection<Event> events = Arrays.asList(
         new Event("Event 1", TimeRange.fromStartEnd(TimeRange.START_OF_DAY, TimeRange.END_OF_DAY, true),
             Arrays.asList(PERSON_A)),
