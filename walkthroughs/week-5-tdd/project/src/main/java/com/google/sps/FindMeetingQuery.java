@@ -15,9 +15,175 @@
 package com.google.sps;
 
 import java.util.Collection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public final class FindMeetingQuery {
-  public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-    throw new UnsupportedOperationException("TODO: Implement this method.");
-  }
+    public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
+        ArrayList<TimeRange> mandatoryAttendeesUnavailableTimes = new ArrayList<TimeRange>();
+        ArrayList<TimeRange> optionalAttendeesUnavailableTimes = new ArrayList<TimeRange>();
+        HashMap<String, ArrayList<TimeRange>> optionalAttendeeUnavailableTimes = new HashMap<String, ArrayList<TimeRange>>();
+        for (String optionalAttendee : request.getOptionalAttendees()) {
+            optionalAttendeeUnavailableTimes.put(optionalAttendee, new ArrayList<TimeRange>());
+        }
+        for (Event event : events) {
+            HashSet<String> intersection;
+            intersection = new HashSet<String>();
+            intersection.addAll(event.getAttendees());
+            intersection.retainAll(request.getAttendees());
+            // If a mandatory attendee has an event, the time slot does not allow mandatory and optional attendees to attend.
+            if (intersection.size() > 0) {
+                mandatoryAttendeesUnavailableTimes.add(event.getWhen());
+                optionalAttendeesUnavailableTimes.add(event.getWhen());
+            }
+            intersection = new HashSet<String>();
+            intersection.addAll(event.getAttendees());
+            intersection.retainAll(request.getOptionalAttendees());
+            // If an optional attendee has an event, the time slot does not allow optional attendees to attend.
+            if (intersection.size() > 0) {
+                optionalAttendeesUnavailableTimes.add(event.getWhen());
+            }
+            for (String optionalAttendee : intersection) {
+                optionalAttendeeUnavailableTimes.get(optionalAttendee).add(event.getWhen());
+            }
+        }
+        ArrayList<TimeRange> mandatoryAttendeesAvailableTimes = findAvailableTimes(mandatoryAttendeesUnavailableTimes, request);
+        ArrayList<TimeRange> optionalAttendeesAvailableTimes = findAvailableTimes(optionalAttendeesUnavailableTimes, request);
+        // Find the time slot(s) that allow mandatory attendees and the greatest possible number of optional attendees to attend.
+        HashMap<String, ArrayList<TimeRange>> optionalAttendeeAvailableTimes = new HashMap<String, ArrayList<TimeRange>>();
+        for (String optionalAttendee : request.getOptionalAttendees()) {
+            optionalAttendeeAvailableTimes.put(optionalAttendee, new ArrayList<TimeRange>());
+        }
+        for (Map.Entry<String, ArrayList<TimeRange>> entry : optionalAttendeeUnavailableTimes.entrySet()) {
+            String optionalAttendee = entry.getKey();
+            ArrayList<TimeRange> unavailableTimes = entry.getValue();
+            ArrayList<TimeRange> availableTimes = findAvailableTimes(unavailableTimes, request);
+            optionalAttendeeAvailableTimes.get(optionalAttendee).addAll(availableTimes);
+        }
+        HashMap<TimeRange, Integer> optimalAvailableTimes = new HashMap<TimeRange, Integer>();
+        for (Map.Entry<String, ArrayList<TimeRange>> entry : optionalAttendeeAvailableTimes.entrySet()) {
+            ArrayList<TimeRange> availableTimes = entry.getValue();
+            for (TimeRange availableTime : availableTimes) {
+                for (TimeRange mandatoryAttendeesAvailableTime : mandatoryAttendeesAvailableTimes) {
+                    if ((mandatoryAttendeesAvailableTime.contains(availableTime) == true) || (availableTime.contains(mandatoryAttendeesAvailableTime) == true)) {
+                        if (optimalAvailableTimes.containsKey(mandatoryAttendeesAvailableTime)) {
+                            int count = optimalAvailableTimes.get(mandatoryAttendeesAvailableTime);
+                            optimalAvailableTimes.put(mandatoryAttendeesAvailableTime, count + 1);
+                        } else {
+                            optimalAvailableTimes.put(mandatoryAttendeesAvailableTime, 1);
+                        }
+                    }
+                }
+            }
+        }
+        int maximum = 0;
+        ArrayList<TimeRange> optimalAvailableTime = new ArrayList<TimeRange>();
+        for (Map.Entry<TimeRange, Integer> entry : optimalAvailableTimes.entrySet()) {
+            TimeRange availableTime = entry.getKey();
+            int count = entry.getValue();
+            if (count > maximum) {
+                maximum = count;
+                optimalAvailableTime.clear();
+                optimalAvailableTime.add(availableTime);
+            } else if (count == maximum) {
+                optimalAvailableTime.add(availableTime);
+            }
+        }
+        if (optionalAttendeesAvailableTimes.size() > 0) {
+            return optionalAttendeesAvailableTimes;
+        } else {
+            if (optimalAvailableTime.size() > 0) {
+                return optimalAvailableTime;
+            } else {
+                return mandatoryAttendeesAvailableTimes;
+            }
+        }
+    }
+
+    private ArrayList<TimeRange> findAvailableTimes(ArrayList<TimeRange> unavailableTimes, MeetingRequest request) {
+        // Sort time ranges by start time.
+        TimeRangeComparator comparator = new TimeRangeComparator();
+        unavailableTimes.sort(comparator);
+        // Combine overlapping time ranges.
+        int i = 0;
+        while (i < unavailableTimes.size() - 1) {
+            if (unavailableTimes.get(i).overlaps(unavailableTimes.get(i + 1)) == true) {
+                int start = unavailableTimes.get(i).start();
+                int end;
+                if (Long.compare(unavailableTimes.get(i).end(), unavailableTimes.get(i + 1).end()) > 0) {
+                    end = unavailableTimes.get(i).end();
+                } else {
+                    end = unavailableTimes.get(i + 1).end();
+                }
+                unavailableTimes.set(i, TimeRange.fromStartEnd(start, end, false));
+                unavailableTimes.remove(i + 1);
+            } else {
+                i++;
+            }
+        }
+
+        ArrayList<TimeRange> availableTimes = new ArrayList<TimeRange>();
+        if (unavailableTimes.size() == 0) {
+            // If there are no time slots that attendees are unavailable, the whole day is available.
+            int start;
+            int end;
+            TimeRange time;
+            start = TimeRange.START_OF_DAY;
+            end = TimeRange.END_OF_DAY;
+            time = TimeRange.fromStartEnd(start, end, true);
+            if (time.duration() >= request.getDuration()) {
+                availableTimes.add(time);
+            }
+        } else if (unavailableTimes.size() == 1) {
+            // If there are time slots that attendees are unavailable, the gaps in the schedules are available.
+            int start;
+            int end;
+            TimeRange time;
+            start = TimeRange.START_OF_DAY;
+            end = unavailableTimes.get(i).start();
+            time = TimeRange.fromStartEnd(start, end, false);
+            if (time.duration() >= request.getDuration()) {
+                availableTimes.add(time);
+            }
+            start = unavailableTimes.get(i).end();
+            end = TimeRange.END_OF_DAY;
+            time = TimeRange.fromStartEnd(start, end, true);
+            if (time.duration() >= request.getDuration()) {
+                availableTimes.add(time);
+            }
+        } else {
+            for (i = 0; i < unavailableTimes.size(); i++) {
+                int start;
+                int end;
+                TimeRange time;
+                if ((i == 0) && (unavailableTimes.get(i).start() != TimeRange.START_OF_DAY)) {
+                    start = TimeRange.START_OF_DAY;
+                    end = unavailableTimes.get(i).start();
+                    time = TimeRange.fromStartEnd(start, end, end == TimeRange.END_OF_DAY);
+                    if (time.duration() >= request.getDuration()) {
+                        availableTimes.add(time);
+                    }
+                }
+                if (i != 0) {
+                    start = unavailableTimes.get(i - 1).end();
+                    end = unavailableTimes.get(i).start();
+                    time = TimeRange.fromStartEnd(start, end, end == TimeRange.END_OF_DAY);
+                    if (time.duration() >= request.getDuration()) {
+                        availableTimes.add(time);
+                    }
+                }
+                if ((i == unavailableTimes.size() - 1) && (unavailableTimes.get(i).end() - 1 != TimeRange.END_OF_DAY)) {
+                    start = unavailableTimes.get(i).end();
+                    end = TimeRange.END_OF_DAY;
+                    time = TimeRange.fromStartEnd(start, end, end == TimeRange.END_OF_DAY);
+                    if (time.duration() >= request.getDuration()) {
+                        availableTimes.add(time);
+                    }
+                }
+            }
+        }
+        return availableTimes;
+    }
 }
