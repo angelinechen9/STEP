@@ -57,8 +57,8 @@ public final class FindMeetingQuery {
         // Find the time slot(s) that allow mandatory attendees and the greatest possible number of optional attendees to attend.
         HashMap<String, Integer> optionalAttendeesAvailableTimeValues = new HashMap<String, Integer>();
         for (int i = 0; i < optionalAttendeesAvailableTimes.size(); i++) {
-            optionalAttendeesAvailableTimeValues.put(i + "0", optionalAttendeesAvailableTimes.get(i).start());
-            optionalAttendeesAvailableTimeValues.put(i + "1", optionalAttendeesAvailableTimes.get(i).end());
+            optionalAttendeesAvailableTimeValues.put("0" + i, optionalAttendeesAvailableTimes.get(i).start());
+            optionalAttendeesAvailableTimeValues.put("1" + i, optionalAttendeesAvailableTimes.get(i).end());
         }
         // Sort time values.
         ArrayList<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>();
@@ -76,7 +76,7 @@ public final class FindMeetingQuery {
         ArrayList<Integer> optionalAttendeesOptimalAvailableTimes = new ArrayList<Integer>();
         int count = 0;
         for (Map.Entry<String, Integer> entry : optionalAttendeesAvailableTimeValuesSorted.entrySet()) {
-            switch (entry.getKey().charAt(1)) {
+            switch (entry.getKey().charAt(0)) {
                 // If the time value is a start time, increment the number of attendees that are available.
                 case '0':
                     count++;
